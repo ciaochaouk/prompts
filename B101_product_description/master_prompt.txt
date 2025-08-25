@@ -21,6 +21,7 @@ Write in British English. Output HTML ONLY — no explanations.
 - Accuracy: Do not invent technical fabric technologies or supplier details. Keep material language general such as “soft”, “lightweight feel”, “comfortable for everyday wear”.
 - Try to avoid using "matchday" for non-UK teams
 - No citations or reference markers of any kind.** Never output tokens like :contentReference, “cite”, “source”, bracketed IDs, or special symbols. Output only clean HTML text (no sources, no footnotes).
+- Use 1–2 long-tail variations based on the product name (e.g., shortenings like “Inter Milan away shirt for kids”, “2025/26 Inter away kit”). Place them naturally in benefits, history, achivement,...
 - Humanisation
   - Vary sentence lengths deliberately across all sections (short, medium, long).
   - Avoid repeating the full product name in every section heading — allow variations like "this kit", "the away edition", "our {{json.team_name}} kids set".
@@ -99,10 +100,35 @@ If ANY check fails:
 <!-- Removed rigid repetition of full product name in header -->
 
 <ul>
-  <!-- Package Includes: mention json.team_name + json.kit_type + json.audience.
+  <!-- Package Includes:
+       mention json.team_name + json.kit_type + json.audience.
        Replace "Kit" with "Shirt and Shorts" ONLY here (not elsewhere in the page).
-       If json.socks_included is true, append "with socks"; otherwise append "with no socks". -->
+       If json.socks_included is true, append "with socks"; otherwise append "with no socks".
+
+       ### Rules for "What’s Included"
+       - If product_name has “Kit” → list Shirt + Shorts.
+       - If it also has “(With Socks)” → include Socks.
+       - If it has “(No Socks)” → exclude Socks.
+       - If product_name has “Shirt” (not Kit) → Shirt only.
+       - Do not invent extra items or wording.  
+  -->
   <li><strong>Package includes:</strong> {{PACKAGE_INCLUDES}}</li>
+
+  <!-- PRODUCT DETAILS:
+       - MATERIAL_LINE: If json.material exists, mention e.g. "100% lightweight polyester feel"; 
+         else fallback to "soft, lightweight feel for everyday wear".
+       - CLUB_INSPIRATION: Mention team_name and tie to shirts worn by players,
+         else fallback to "inspired by the club colours".
+       - NECKLINE_DETAIL: If json.neckline exists, include (e.g. V-neck, crew neck); 
+         else fallback to "a comfortable neckline that looks smart".
+       - LOGO_PRINT: Always include a parent-friendly line like 
+         "Crest and sponsor areas use a smooth, durable finish".
+       - WASHING_EXTRA: Add a short casual tip (e.g. "cold wash, air dry, and it’ll keep its colours"). -->
+  <li><strong>Material & Feel:</strong> {{MATERIAL_LINE}}</li>
+  <li><strong>Club Inspiration:</strong> {{CLUB_INSPIRATION}}</li>
+  <li><strong>Design Detail:</strong> {{NECKLINE_DETAIL}}</li>
+  <li><strong>Print & Logos:</strong> {{LOGO_PRINT}}</li>
+  <li><strong>Care:</strong> {{WASHING_EXTRA}}</li>
 
   {{#if json.personalisation_available}}
   <li><strong>Personalisation: </strong> Available (name up to 13 characters, number up to 2 digits).</li>
@@ -175,9 +201,11 @@ If ANY check fails:
 {{#if json.team_facts}}
 <h2><strong>About {{json.team_name}}</strong></h2>
 <ul>
-  <!-- Write 3–5 sentences about the team’s history, stadium, achievements, and recent progress.
-    - Avoid textbook or Wikipedia-style summaries.
-    - Mix sentence lengths deliberately (some short, some meandering).
+  <!-- Write 4–6 sentences about the team’s history, stadium, achievements, and recent progress in the fan-friendly way (80–100 words total)
+    - Do not invent facts, only use text provided in json.team_facts.
+    - If no club text is provided, output one neutral support line (no specifics)
+    - Avoid textbook or Wikipedia-style summaries, avoid encyclopedia tone.
+    - Mix sentence lengths deliberately (some short, some meandering)
     - Use conversational quirks (“fun fact”, “you can almost feel…”, “and honestly”).
     - Add a touch of colour or parent perspective, e.g. “Kids love shouting the team name as if they’re on the pitch.”
     - Allow one sentence to sound a little anecdotal or casual, even slightly imperfect.
@@ -193,9 +221,11 @@ If ANY check fails:
 {{#if (and json.player_name (ne (trim json.player_name) ""))}}
 <h2><strong>About the Player</strong></h2>
 <ul>
-   <!-- Write 3–5 distinct sentences about the player. 
+   <!-- Write 4–6 distinct sentences about the player. 
       - Generate 3 distinct player fact bullets without duplication
       - Drop the shirt-number digits (e.g. "MESSI 10" → "Messi").
+      - If json.player_style == "story": output one story-style paragraph (80–100 words).
+      - Never invent trophies or stats; only use json.player_facts if available.
       - Blend admiration with casual phrasing: “Everyone knows Messi… and honestly, kids light up when they hear his name.”
       - Avoid sounding like a CV. Mix short and long sentences.
       - Use small human touches, e.g. “Parents tell us their kids tried to dribble like him in the garden.”
